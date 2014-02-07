@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001, 2012, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2001, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -322,7 +322,7 @@ class BinaryTreeDictionary: public FreeBlockDictionary<Chunk_t> {
   void       set_tree_hints(void);
   // Reset statistics for all the lists in the tree.
   void       clear_tree_census(void);
-  // Print the statistcis for all the lists in the tree.  Also may
+  // Print the statistics for all the lists in the tree.  Also may
   // print out summaries.
   void       print_dict_census(void) const;
   void       print_free_lists(outputStream* st) const;

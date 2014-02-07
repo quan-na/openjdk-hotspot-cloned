@@ -2104,6 +2104,9 @@ void* os::dll_lookup(void* handle, const char* name) {
   return res;
 }
 
+void* os::get_default_process_handle() {
+  return (void*)::dlopen(NULL, RTLD_LAZY);
+}
 
 static bool _print_ascii_file(const char* filename, outputStream* st) {
   int fd = ::open(filename, O_RDONLY);
@@ -2368,13 +2371,14 @@ void os::jvm_path(char *buf, jint buflen) {
   if (rp == NULL)
     return;
 
-  if (Arguments::created_by_gamma_launcher()) {
-    // Support for the gamma launcher.  Typical value for buf is
-    // "<JAVA_HOME>/jre/lib/<arch>/<vmtype>/libjvm.so".  If "/jre/lib/" appears at
-    // the right place in the string, then assume we are installed in a JDK and
-    // we're done.  Otherwise, check for a JAVA_HOME environment variable and fix
-    // up the path so it looks like libjvm.so is installed there (append a
-    // fake suffix hotspot/libjvm.so).
+  if (Arguments::sun_java_launcher_is_altjvm()) {
+    // Support for the java launcher's '-XXaltjvm=<path>' option. Typical
+    // value for buf is "<JAVA_HOME>/jre/lib/<arch>/<vmtype>/libjvm.so".
+    // If "/jre/lib/" appears at the right place in the string, then
+    // assume we are installed in a JDK and we're done. Otherwise, check
+    // for a JAVA_HOME environment variable and fix up the path so it
+    // looks like libjvm.so is installed there (append a fake suffix
+    // hotspot/libjvm.so).
     const char *p = buf + strlen(buf) - 1;
     for (int count = 0; p > buf && count < 5; ++count) {
       for (--p; p > buf && *p != '/'; --p)
@@ -3868,9 +3872,33 @@ int os::sleep(Thread* thread, jlong millis, bool interruptible) {
   }
 }
 
-int os::naked_sleep() {
-  // %% make the sleep time an integer flag. for now use 1 millisec.
-  return os::sleep(Thread::current(), 1, false);
+//
+// Short sleep, direct OS call.
+//
+// Note: certain versions of Linux CFS scheduler (since 2.6.23) do not guarantee
+// sched_yield(2) will actually give up the CPU:
+//
+//   * Alone on this pariticular CPU, keeps running.
+//   * Before the introduction of "skip_buddy" with "compat_yield" disabled
+//     (pre 2.6.39).
+//
+// So calling this with 0 is an alternative.
+//
+void os::naked_short_sleep(jlong ms) {
+  struct timespec req;
+
+  assert(ms < 1000, "Un-interruptable sleep, short time use only");
+  req.tv_sec = 0;
+  if (ms > 0) {
+    req.tv_nsec = (ms % 1000) * 1000000;
+  }
+  else {
+    req.tv_nsec = 1;
+  }
+
+  nanosleep(&req, NULL);
+
+  return;
 }
 
 // Sleep forever; naked call to OS-specific sleep; use with CAUTION

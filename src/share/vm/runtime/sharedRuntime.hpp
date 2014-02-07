@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2012, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -382,7 +382,7 @@ class SharedRuntime: AllStatic {
   // present if we see that compiled code is present the compiled call site
   // will be patched/re-resolved so that later calls will run compiled.
 
-  // Aditionally a c2i blob need to have a unverified entry because it can be reached
+  // Additionally a c2i blob need to have a unverified entry because it can be reached
   // in situations where the call site is an inlined cache site and may go megamorphic.
 
   // A i2c adapter is simpler than the c2i adapter. This is because it is assumed
@@ -576,7 +576,7 @@ class SharedRuntime: AllStatic {
 // arguments for a Java-compiled call, and jumps to Rmethod-> code()->
 // code_begin().  It is broken to call it without an nmethod assigned.
 // The usual behavior is to lift any register arguments up out of the
-// stack and possibly re-pack the extra arguments to be contigious.
+// stack and possibly re-pack the extra arguments to be contiguous.
 // I2C adapters will save what the interpreter's stack pointer will be
 // after arguments are popped, then adjust the interpreter's frame
 // size to force alignment and possibly to repack the arguments.
@@ -593,7 +593,7 @@ class SharedRuntime: AllStatic {
 // outgoing stack args will be dead after the copy.
 //
 // Native wrappers, like adapters, marshal arguments.  Unlike adapters they
-// also perform an offical frame push & pop.  They have a call to the native
+// also perform an official frame push & pop.  They have a call to the native
 // routine in their middles and end in a return (instead of ending in a jump).
 // The native wrappers are stored in real nmethods instead of the BufferBlobs
 // used by the adapters.  The code generation happens here because it's very
@@ -610,11 +610,9 @@ class AdapterHandlerEntry : public BasicHashtableEntry<mtCode> {
 
 #ifdef ASSERT
   // Captures code and signature used to generate this adapter when
-  // verifing adapter equivalence.
+  // verifying adapter equivalence.
   unsigned char* _saved_code;
-  int            _code_length;
-  BasicType*     _saved_sig;
-  int            _total_args_passed;
+  int            _saved_code_length;
 #endif
 
   void init(AdapterFingerPrint* fingerprint, address i2c_entry, address c2i_entry, address c2i_unverified_entry) {
@@ -624,9 +622,7 @@ class AdapterHandlerEntry : public BasicHashtableEntry<mtCode> {
     _c2i_unverified_entry = c2i_unverified_entry;
 #ifdef ASSERT
     _saved_code = NULL;
-    _code_length = 0;
-    _saved_sig = NULL;
-    _total_args_passed = 0;
+    _saved_code_length = 0;
 #endif
   }
 
@@ -639,7 +635,6 @@ class AdapterHandlerEntry : public BasicHashtableEntry<mtCode> {
   address get_i2c_entry()            const { return _i2c_entry; }
   address get_c2i_entry()            const { return _c2i_entry; }
   address get_c2i_unverified_entry() const { return _c2i_unverified_entry; }
-
   address base_address();
   void relocate(address new_base);
 
@@ -651,8 +646,8 @@ class AdapterHandlerEntry : public BasicHashtableEntry<mtCode> {
 
 #ifdef ASSERT
   // Used to verify that code generated for shared adapters is equivalent
-  void save_code(unsigned char* code, int length, int total_args_passed, BasicType* sig_bt);
-  bool compare_code(unsigned char* code, int length, int total_args_passed, BasicType* sig_bt);
+  void save_code   (unsigned char* code, int length);
+  bool compare_code(unsigned char* code, int length);
 #endif
 
   //virtual void print_on(outputStream* st) const;  DO NOT USE
@@ -671,7 +666,7 @@ class AdapterHandlerLibrary: public AllStatic {
 
   static AdapterHandlerEntry* new_entry(AdapterFingerPrint* fingerprint,
                                         address i2c_entry, address c2i_entry, address c2i_unverified_entry);
-  static nmethod* create_native_wrapper(methodHandle method, int compile_id);
+  static void create_native_wrapper(methodHandle method);
   static AdapterHandlerEntry* get_adapter(methodHandle method);
 
 #ifdef HAVE_DTRACE_H

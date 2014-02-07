@@ -2146,6 +2146,10 @@ void* os::dll_lookup(void* handle, const char* name) {
   return dlsym(handle, name);
 }
 
+void* os::get_default_process_handle() {
+  return (void*)::dlopen(NULL, RTLD_LAZY);
+}
+
 int os::stat(const char *path, struct stat *sbuf) {
   char pathbuf[MAX_PATH];
   if (strlen(path) > MAX_PATH - 1) {
@@ -2437,13 +2441,14 @@ void os::jvm_path(char *buf, jint buflen) {
     return;
   }
 
-  if (Arguments::created_by_gamma_launcher()) {
-    // Support for the gamma launcher.  Typical value for buf is
-    // "<JAVA_HOME>/jre/lib/<arch>/<vmtype>/libjvm.so".  If "/jre/lib/" appears at
-    // the right place in the string, then assume we are installed in a JDK and
-    // we're done.  Otherwise, check for a JAVA_HOME environment variable and fix
-    // up the path so it looks like libjvm.so is installed there (append a
-    // fake suffix hotspot/libjvm.so).
+  if (Arguments::sun_java_launcher_is_altjvm()) {
+    // Support for the java launcher's '-XXaltjvm=<path>' option. Typical
+    // value for buf is "<JAVA_HOME>/jre/lib/<arch>/<vmtype>/libjvm.so".
+    // If "/jre/lib/" appears at the right place in the string, then
+    // assume we are installed in a JDK and we're done.  Otherwise, check
+    // for a JAVA_HOME environment variable and fix up the path so it
+    // looks like libjvm.so is installed there (append a fake suffix
+    // hotspot/libjvm.so).
     const char *p = buf + strlen(buf) - 1;
     for (int count = 0; p > buf && count < 5; ++count) {
       for (--p; p > buf && *p != '/'; --p)
@@ -3536,9 +3541,14 @@ int os::sleep(Thread* thread, jlong millis, bool interruptible) {
   return os_sleep(millis, interruptible);
 }
 
-int os::naked_sleep() {
-  // %% make the sleep time an integer flag. for now use 1 millisec.
-  return os_sleep(1, false);
+void os::naked_short_sleep(jlong ms) {
+  assert(ms < 1000, "Un-interruptable sleep, short time use only");
+
+  // usleep is deprecated and removed from POSIX, in favour of nanosleep, but
+  // Solaris requires -lrt for this.
+  usleep((ms * 1000));
+
+  return;
 }
 
 // Sleep forever; naked call to OS-specific sleep; use with CAUTION

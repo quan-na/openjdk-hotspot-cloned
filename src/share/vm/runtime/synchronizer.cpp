@@ -119,7 +119,7 @@ HS_DTRACE_PROBE_DECL4(hotspot, monitor__waited,
     }                                                                      \
   }
 
-#define HOTSPOT_MONITOR_PROBE_waited HOTSPOT_MONITOR_PROBE_WAITED
+#define HOTSPOT_MONITOR_PROBE_waited HOTSPOT_MONITOR_WAITED
 
 #define DTRACE_MONITOR_PROBE(probe, monitor, obj, thread)                  \
   {                                                                        \
@@ -737,10 +737,10 @@ bool ObjectSynchronizer::current_thread_holds_lock(JavaThread* thread,
 }
 
 // Be aware of this method could revoke bias of the lock object.
-// This method querys the ownership of the lock handle specified by 'h_obj'.
+// This method queries the ownership of the lock handle specified by 'h_obj'.
 // If the current thread owns the lock, it returns owner_self. If no
 // thread owns the lock, it returns owner_none. Otherwise, it will return
-// ower_other.
+// owner_other.
 ObjectSynchronizer::LockOwnership ObjectSynchronizer::query_lock_ownership
 (JavaThread *self, Handle h_obj) {
   // The caller must beware this method can revoke bias, and

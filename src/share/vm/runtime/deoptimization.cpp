@@ -380,7 +380,7 @@ Deoptimization::UnrollBlock* Deoptimization::fetch_unroll_info_helper(JavaThread
   frame deopt_sender = stub_frame.sender(&dummy_map); // First is the deoptee frame
   deopt_sender = deopt_sender.sender(&dummy_map);     // Now deoptee caller
 
-  // It's possible that the number of paramters at the call site is
+  // It's possible that the number of parameters at the call site is
   // different than number of arguments in the callee when method
   // handles are used.  If the caller is interpreted get the real
   // value so that the proper amount of space can be added to it's
@@ -540,7 +540,7 @@ void Deoptimization::cleanup_deopt_info(JavaThread *thread,
     // popframe condition bit set, we should always clear it now
     thread->clear_popframe_condition();
 #else
-    // C++ interpeter will clear has_pending_popframe when it enters
+    // C++ interpreter will clear has_pending_popframe when it enters
     // with method_resume. For deopt_resume2 we clear it now.
     if (thread->popframe_forcing_deopt_reexecution())
         thread->clear_popframe_condition();
@@ -1224,9 +1224,19 @@ void Deoptimization::load_class_by_index(constantPoolHandle constant_pool, int i
   load_class_by_index(constant_pool, index, THREAD);
   if (HAS_PENDING_EXCEPTION) {
     // Exception happened during classloading. We ignore the exception here, since it
-    // is going to be rethrown since the current activation is going to be deoptimzied and
+    // is going to be rethrown since the current activation is going to be deoptimized and
     // the interpreter will re-execute the bytecode.
     CLEAR_PENDING_EXCEPTION;
+    // Class loading called java code which may have caused a stack
+    // overflow. If the exception was thrown right before the return
+    // to the runtime the stack is no longer guarded. Reguard the
+    // stack otherwise if we return to the uncommon trap blob and the
+    // stack bang causes a stack overflow we crash.
+    assert(THREAD->is_Java_thread(), "only a java thread can be here");
+    JavaThread* thread = (JavaThread*)THREAD;
+    bool guard_pages_enabled = thread->stack_yellow_zone_enabled();
+    if (!guard_pages_enabled) guard_pages_enabled = thread->reguard_stack();
+    assert(guard_pages_enabled, "stack banging in uncommon trap blob may cause crash");
   }
 }
 

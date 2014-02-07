@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -19,22 +19,26 @@
  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
  * or visit www.oracle.com if you need additional information or have any
  * questions.
- *  
  */
 
-provider hs_private {
-  probe hashtable__new_entry(void*, uint32_t, uintptr_t, void*); 
-  probe safepoint__begin();
-  probe safepoint__end();
-  probe cms__initmark__begin();
-  probe cms__initmark__end();
-  probe cms__remark__begin();
-  probe cms__remark__end();
-};
+/*
+ * @test
+ * @bug 8032207
+ * @summary Invalid node sizing for loadUS2L_immI16 and loadI2L_immI
+ * @run main/othervm -server -Xbatch -XX:-TieredCompilation -XX:CompileCommand=compileonly,LoadWithMask.foo LoadWithMask
+ *
+ */
+public class LoadWithMask {
+  static int x[] = new int[1];
+  static long foo() {
+    return x[0] & 0xfff0ffff;
+  }
 
-#pragma D attributes Private/Private/Common provider hs_private provider
-#pragma D attributes Private/Private/Unknown provider hs_private module
-#pragma D attributes Private/Private/Unknown provider hs_private function
-#pragma D attributes Private/Private/Common provider hs_private name
-#pragma D attributes Private/Private/Common provider hs_private args
-
+  public static void main(String[] args) {
+    x[0] = -1;
+    long l = 0;
+    for (int i = 0; i < 100000; ++i) {
+      l = foo();
+    }
+  }
+}

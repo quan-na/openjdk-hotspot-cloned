@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001, 2012, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2001, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -92,7 +92,7 @@ public:
   }
 
   // The total (word) size of the buffer, including both allocated and
-  // unallocted space.
+  // unallocated space.
   size_t word_sz() { return _word_sz; }
 
   // Should only be done if we are about to reset with a new buffer of the
@@ -181,16 +181,7 @@ class PLABStats VALUE_OBJ_CLASS_SPEC {
     _used(0),
     _desired_plab_sz(desired_plab_sz_),
     _filter(wt)
-  {
-    size_t min_sz = min_size();
-    size_t max_sz = max_size();
-    size_t aligned_min_sz = align_object_size(min_sz);
-    size_t aligned_max_sz = align_object_size(max_sz);
-    assert(min_sz <= aligned_min_sz && max_sz >= aligned_max_sz &&
-           min_sz <= max_sz,
-           "PLAB clipping computation in adjust_desired_plab_sz()"
-           " may be incorrect");
-  }
+  { }
 
   static const size_t min_size() {
     return ParGCAllocBuffer::min_size();

@@ -482,7 +482,7 @@ static bool under_host_klass(InstanceKlass* ik, Klass* host_klass) {
     ik = InstanceKlass::cast(hc);
 
     // There's no way to make a host class loop short of patching memory.
-    // Therefore there cannot be a loop here unles there's another bug.
+    // Therefore there cannot be a loop here unless there's another bug.
     // Still, let's check for it.
     assert(--inf_loop_check > 0, "no host_klass loop");
   }
@@ -537,15 +537,26 @@ bool Reflection::verify_field_access(Klass* current_class,
     return true;
   }
 
+  Klass* host_class = current_class;
+  while (host_class->oop_is_instance() &&
+         InstanceKlass::cast(host_class)->is_anonymous()) {
+    Klass* next_host_class = InstanceKlass::cast(host_class)->host_klass();
+    if (next_host_class == NULL)  break;
+    host_class = next_host_class;
+  }
+  if (host_class == field_class) {
+    return true;
+  }
+
   if (access.is_protected()) {
     if (!protected_restriction) {
-      // See if current_class is a subclass of field_class
-      if (current_class->is_subclass_of(field_class)) {
+      // See if current_class (or outermost host class) is a subclass of field_class
+      if (host_class->is_subclass_of(field_class)) {
         if (access.is_static() || // static fields are ok, see 6622385
             current_class == resolved_class ||
             field_class == resolved_class ||
-            current_class->is_subclass_of(resolved_class) ||
-            resolved_class->is_subclass_of(current_class)) {
+            host_class->is_subclass_of(resolved_class) ||
+            resolved_class->is_subclass_of(host_class)) {
           return true;
         }
       }
