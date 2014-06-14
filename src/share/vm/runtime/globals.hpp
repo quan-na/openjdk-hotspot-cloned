@@ -599,6 +599,9 @@ class CommandLineFlags {
   product(bool, UseAES, false,                                              \
           "Control whether AES instructions can be used on x86/x64")        \
                                                                             \
+  product(bool, UseSHA, false,                                              \
+          "Control whether SHA instructions can be used on SPARC")          \
+                                                                            \
   product(uintx, LargePageSizeInBytes, 0,                                   \
           "Large page size (0 to let VM choose the page size)")             \
                                                                             \
@@ -704,6 +707,15 @@ class CommandLineFlags {
                                                                             \
   product(bool, UseAESIntrinsics, false,                                    \
           "Use intrinsics for AES versions of crypto")                      \
+                                                                            \
+  product(bool, UseSHA1Intrinsics, false,                                   \
+          "Use intrinsics for SHA-1 crypto hash function")                  \
+                                                                            \
+  product(bool, UseSHA256Intrinsics, false,                                 \
+          "Use intrinsics for SHA-224 and SHA-256 crypto hash functions")   \
+                                                                            \
+  product(bool, UseSHA512Intrinsics, false,                                 \
+          "Use intrinsics for SHA-384 and SHA-512 crypto hash functions")   \
                                                                             \
   product(bool, UseCRC32Intrinsics, false,                                  \
           "use intrinsics for java.util.zip.CRC32")                         \
@@ -1450,8 +1462,7 @@ class CommandLineFlags {
           "(ParallelGC only)")                                              \
                                                                             \
   product(bool, ScavengeBeforeFullGC, true,                                 \
-          "Scavenge youngest generation before each full GC, "              \
-          "used with UseParallelGC")                                        \
+          "Scavenge youngest generation before each full GC.")              \
                                                                             \
   develop(bool, ScavengeWithObjectsInToSpace, false,                        \
           "Allow scavenges to occur when to-space contains objects")        \
@@ -2252,9 +2263,6 @@ class CommandLineFlags {
   notproduct(bool, CheckMemoryInitialization, false,                        \
           "Check memory initialization")                                    \
                                                                             \
-  product(bool, CollectGen0First, false,                                    \
-          "Collect youngest generation before each full GC")                \
-                                                                            \
   diagnostic(bool, BindCMSThreadToCPU, false,                               \
           "Bind CMS Thread to CPU if possible")                             \
                                                                             \
@@ -2333,11 +2341,11 @@ class CommandLineFlags {
           NOT_LP64(2200*K) LP64_ONLY(4*M),                                  \
           "Initial size of the boot class loader data metaspace")           \
                                                                             \
-  product(bool, TraceGen0Time, false,                                       \
-          "Trace accumulated time for Gen 0 collection")                    \
+  product(bool, TraceYoungGenTime, false,                                   \
+          "Trace accumulated time for young collection")                    \
                                                                             \
-  product(bool, TraceGen1Time, false,                                       \
-          "Trace accumulated time for Gen 1 collection")                    \
+  product(bool, TraceOldGenTime, false,                                     \
+          "Trace accumulated time for old collection")                      \
                                                                             \
   product(bool, PrintTenuringDistribution, false,                           \
           "Print tenuring age information")                                 \
