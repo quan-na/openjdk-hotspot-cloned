@@ -22,35 +22,23 @@
  *
  */
 
-package sun.hotspot.code;
+package sun.jvm.hotspot.debugger.proc.ppc64;
 
-import java.lang.reflect.Executable;
-import sun.hotspot.WhiteBox;
+import sun.jvm.hotspot.debugger.*;
+import sun.jvm.hotspot.debugger.proc.*;
 
-public class NMethod extends CodeBlob {
-  private static final WhiteBox wb = WhiteBox.getWhiteBox();
-  public static NMethod get(Executable method, boolean isOsr) {
-    Object[] obj = wb.getNMethod(method, isOsr);
-    return obj == null ? null : new NMethod(obj);
+public class ProcPPC64ThreadFactory implements ProcThreadFactory {
+  private ProcDebugger debugger;
+
+  public ProcPPC64ThreadFactory(ProcDebugger debugger) {
+    this.debugger = debugger;
   }
-  private NMethod(Object[] obj) {
-    super((Object[])obj[0]);
-    assert obj.length == 4;
-    comp_level = (Integer) obj[1];
-    insts = (byte[]) obj[2];
-    compile_id = (Integer) obj[3];
-  }
-  public final byte[] insts;
-  public final int comp_level;
-  public final int compile_id;
 
-  @Override
-  public String toString() {
-    return "NMethod{"
-        + super.toString()
-        + ", insts=" + insts
-        + ", comp_level=" + comp_level
-        + ", compile_id=" + compile_id
-        + '}';
+  public ThreadProxy createThreadWrapper(Address threadIdentifierAddr) {
+    return new ProcPPC64Thread(debugger, threadIdentifierAddr);
+  }
+
+  public ThreadProxy createThreadWrapper(long id) {
+    return new ProcPPC64Thread(debugger, id);
   }
 }
