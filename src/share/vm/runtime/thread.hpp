@@ -702,7 +702,8 @@ class WatcherThread: public Thread {
   static WatcherThread* _watcher_thread;
 
   static bool _startable;
-  volatile static bool _should_terminate; // updated without holding lock
+  // volatile due to at least one lock-free read
+  volatile static bool _should_terminate;
 
   os::WatcherThreadCrashProtection* _crash_protection;
  public:
@@ -1023,7 +1024,7 @@ class JavaThread: public Thread {
   address last_Java_pc(void)                     { return _anchor.last_Java_pc(); }
 
   // Safepoint support
-#ifndef PPC64
+#if !(defined(PPC64) || defined(AARCH64))
   JavaThreadState thread_state() const           { return _thread_state; }
   void set_thread_state(JavaThreadState s)       { _thread_state = s;    }
 #else
@@ -1702,6 +1703,9 @@ class JavaThread: public Thread {
 #endif
 #ifdef TARGET_OS_ARCH_linux_ppc
 # include "thread_linux_ppc.hpp"
+#endif
+#ifdef TARGET_OS_ARCH_linux_aarch64
+# include "thread_linux_aarch64.hpp"
 #endif
 #ifdef TARGET_OS_ARCH_aix_ppc
 # include "thread_aix_ppc.hpp"
