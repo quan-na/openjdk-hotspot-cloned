@@ -176,6 +176,11 @@ void VM_Version::initialize() {
     FLAG_SET_DEFAULT(UseAESIntrinsics, false);
   }
 
+  if (UseGHASHIntrinsics) {
+    warning("GHASH intrinsics are not available on this CPU");
+    FLAG_SET_DEFAULT(UseGHASHIntrinsics, false);
+  }
+
   if (UseSHA) {
     warning("SHA instructions are not available on this CPU");
     FLAG_SET_DEFAULT(UseSHA, false);
@@ -186,6 +191,13 @@ void VM_Version::initialize() {
     FLAG_SET_DEFAULT(UseSHA256Intrinsics, false);
     FLAG_SET_DEFAULT(UseSHA512Intrinsics, false);
   }
+
+  if (UseCRC32CIntrinsics) {
+    if (!FLAG_IS_DEFAULT(UseCRC32CIntrinsics))
+      warning("CRC32C intrinsics are not available on this CPU");
+    FLAG_SET_DEFAULT(UseCRC32CIntrinsics, false);
+  }
+
   // Adjust RTM (Restricted Transactional Memory) flags.
   if (!has_tcheck() && UseRTMLocking) {
     // Can't continue because UseRTMLocking affects UseBiasedLocking flag
