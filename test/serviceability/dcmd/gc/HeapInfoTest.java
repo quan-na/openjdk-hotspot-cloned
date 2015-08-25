@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -19,34 +19,36 @@
  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
  * or visit www.oracle.com if you need additional information or have any
  * questions.
- *
  */
 
-#include "precompiled.hpp"
-#include "runtime/thread.inline.hpp"
-#include "runtime/threadLocalStorage.hpp"
+import org.testng.annotations.Test;
+import org.testng.Assert;
 
-// True thread-local variable
-__thread Thread * ThreadLocalStorage::_thr_current = NULL;
+import java.io.IOException;
 
-// Implementations needed to support the shared API
+import jdk.test.lib.dcmd.CommandExecutor;
+import jdk.test.lib.dcmd.PidJcmdExecutor;
+import jdk.test.lib.OutputAnalyzer;
 
-void ThreadLocalStorage::pd_invalidate_all() {} // nothing to do
 
-bool ThreadLocalStorage::_initialized = false;
+/*
+ * @test
+ * @summary Test of diagnostic command GC.heap_info
+ * @library /testlibrary
+ * @build jdk.test.lib.*
+ * @build jdk.test.lib.dcmd.*
+ * @run testng HeapInfoTest
+ */
+public class HeapInfoTest {
+    public void run(CommandExecutor executor) {
+        String cmd = "GC.heap_info";
+        OutputAnalyzer output = executor.execute(cmd);
+        output.shouldContain("Metaspace");
+    }
 
-void ThreadLocalStorage::init() {
-  _initialized = true;
+    @Test
+    public void pid() {
+        run(new PidJcmdExecutor());
+    }
 }
 
-bool ThreadLocalStorage::is_initialized() {
-  return _initialized;
-}
-
-Thread* ThreadLocalStorage::get_thread_slow() {
-    return thread();
-}
-
-extern "C" Thread* get_thread() {
-  return ThreadLocalStorage::thread();
-}
