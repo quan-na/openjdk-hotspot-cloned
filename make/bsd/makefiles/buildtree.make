@@ -219,6 +219,11 @@ flags.make: $(BUILDTREE_MAKE) ../shared_dirs.lst
 	echo "OPENJDK = $(OPENJDK)"; \
 	echo "$(LP64_SETTING/$(DATA_MODE))"; \
 	echo; \
+	echo "STATIC_BUILD = $(STATIC_BUILD)"; \
+	echo "COMPILER_WARNINGS_FATAL = $(COMPILER_WARNINGS_FATAL)"; \
+	echo "EXTRA_LDFLAGS = $(EXTRA_LDFLAGS)"; \
+	echo "LIBRARY_SUFFIX = $(LIBRARY_SUFFIX)"; \
+	echo; \
 	echo "# Used for platform dispatching"; \
 	echo "TARGET_DEFINES  = -DTARGET_OS_FAMILY_\$$(Platform_os_family)"; \
 	echo "TARGET_DEFINES += -DTARGET_ARCH_\$$(Platform_arch)"; \

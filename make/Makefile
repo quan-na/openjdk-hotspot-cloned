@@ -400,6 +400,8 @@ $(EXPORT_LIB_ARCH_DIR)/%.dSYM: 		$(C2_BUILD_DIR)/%.dSYM
 	$(install-dir)
 $(EXPORT_SERVER_DIR)/%.dSYM:       		$(C2_BUILD_DIR)/%.dSYM
 	$(install-dir)
+$(EXPORT_SERVER_DIR)/%.symbols:                 $(C2_BUILD_DIR)/%.symbols
+	$(install-file)
 endif
 
 # Client (C1)
