@@ -1059,8 +1059,6 @@ void* ciReplay::load_inline_data(ciMethod* method, int entry_bci, int comp_level
 int ciReplay::replay_impl(TRAPS) {
   HandleMark hm;
   ResourceMark rm;
-  // Make sure we don't run with background compilation
-  BackgroundCompilation = false;
 
   if (ReplaySuppressInitializers > 2) {
     // ReplaySuppressInitializers > 2 means that we want to allow
