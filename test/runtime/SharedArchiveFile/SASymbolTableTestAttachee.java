@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -19,33 +19,20 @@
  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
  * or visit www.oracle.com if you need additional information or have any
  * questions.
- *
  */
 
-#ifndef SHARE_VM_GC_PARALLEL_GENERATIONSIZER_HPP
-#define SHARE_VM_GC_PARALLEL_GENERATIONSIZER_HPP
-
-#include "gc/shared/collectorPolicy.hpp"
-
-// There is a nice batch of tested generation sizing code in
-// GenCollectorPolicy. Lets reuse it!
-
-class GenerationSizer : public GenCollectorPolicy {
- private:
-
-  // The alignment used for boundary between young gen and old gen
-  static size_t default_gen_alignment() { return 64 * K * HeapWordSize; }
-
- protected:
-
-  void initialize_alignments();
-  void initialize_flags();
-  void initialize_size_info();
-
- public:
-  // We don't have associated counters and complain if this is invoked.
-  void initialize_gc_policy_counters() {
-    ShouldNotReachHere();
-  }
-};
-#endif // SHARE_VM_GC_PARALLEL_GENERATIONSIZER_HPP
+/**
+ * This class is launched in a sub-process by the main test,
+ * SASymbolTableTest.java.
+ *
+ * This class does nothing in particular. It just sleeps for 120
+ * seconds so SASymbolTableTestAgent can have a chance to examine its
+ * SymbolTable. This process should be killed by the parent process
+ * after SASymbolTableTestAgent has completed testing.
+ */
+public class SASymbolTableTestAttachee {
+    public static void main(String args[]) throws Throwable {
+        System.out.println("SASymbolTableTestAttachee: sleeping to wait for SA tool to attach ...");
+        Thread.sleep(120 * 1000);
+    }
+}
