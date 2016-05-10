@@ -47,6 +47,12 @@
 
 // Check core dump limit and report possible place where core can be found
 void os::check_dump_limit(char* buffer, size_t bufferSize) {
+  if (!FLAG_IS_DEFAULT(CreateCoredumpOnCrash) && !CreateCoredumpOnCrash) {
+    jio_snprintf(buffer, bufferSize, "CreateCoredumpOnCrash is disabled from command line");
+    VMError::record_coredump_status(buffer, false);
+    return;
+  }
+
   int n;
   struct rlimit rlim;
   bool success;
@@ -319,6 +325,14 @@ const char* os::get_current_directory(char *buf, size_t buflen) {
 
 FILE* os::open(int fd, const char* mode) {
   return ::fdopen(fd, mode);
+}
+
+void os::flockfile(FILE* fp) {
+  ::flockfile(fp);
+}
+
+void os::funlockfile(FILE* fp) {
+  ::funlockfile(fp);
 }
 
 // Builds a platform dependent Agent_OnLoad_<lib_name> function name
